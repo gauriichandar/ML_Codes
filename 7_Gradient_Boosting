@@ -1,0 +1,135 @@
+# Import all relevant libraries
+
+from sklearn.ensemble import GradientBoostingClassifier
+
+import numpy as np
+
+import pandas as pd
+
+from sklearn.preprocessing import StandardScaler
+
+from sklearn.model_selection import train_test_split
+
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+from sklearn import preprocessing
+
+import warnings
+
+warnings.filterwarnings("ignore")
+
+
+
+#STEP-1: Import Libraries
+# Code to read csv file into colaboratory:
+!pip install -U -q PyDrive
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+from google.colab import auth
+from oauth2client.client import GoogleCredentials
+
+
+
+#Now let’s read the dataset and look at the columns to understand the information better.
+#https://drive.google.com/file/d/1zI-X3zdiuM9u74zQyKIShvAUtPJQ7jUK/view?usp=sharing
+df = pd.read_csv('income_evaluation.csv')
+df.head()
+
+
+Here my main aim is to tell you how to implement this on python. Now for training and testing our model, the data has to be divided into train and test data. We will also scale the data to lie between 0 and 1.
+
+
+df.shape
+
+
+df.info()
+
+
+df.isnull().sum()
+
+
+df.columns
+
+
+#df.drop(columns=' fnlwgt',inplace=True)
+df.columns
+
+
+X = df.drop(columns=' income')
+y = df[' income']
+
+
+from sklearn.preprocessing import LabelEncoder
+
+
+df.columns
+
+
+label_list = [' workclass', ' education',' marital-status',
+       ' occupation', ' relationship', ' race', ' sex',' native-country', ' income']
+
+
+for i in label_list:
+    label_encoder(i)
+
+
+
+df.head()
+
+
+
+from sklearn.model_selection import train_test_split
+
+X = df.drop([' income'],axis=1).values   # independant features
+y = df[' income'].values					# dependant variable
+
+# Choose your test size to split between training and testing sets:
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=42)
+
+
+
+print("X_train shape:",X_train.shape)
+print("y_test shape:",y_test.shape)
+print("X_test shape:",X_test.shape)
+print("y_train shape:",y_train.shape)
+
+
+
+#Buildimg Gradient Boosting Model
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
+
+
+gradient_booster = GradientBoostingClassifier(learning_rate=0.1)
+accuracies = cross_val_score(gradient_booster, X_train, y_train, cv=5)
+gradient_booster.fit(X_train,y_train)
+
+print("Train Score:",np.mean(accuracies))
+print("Test Score:",gradient_booster.score(X_test,y_test))
+
+
+result_dict_train = {}
+result_dict_test = {}
+result_dict_train["Gradient-Boost Default Train Score"] = np.mean(accuracies)
+result_dict_test["Gradient-Boost Default Test Score"] = gradient_booster.score(X_test,y_test)
+
+
+grid = {
+    'learning_rate':[0.01,0.05,0.1],
+    'n_estimators':np.arange(100,500,100),
+}
+
+gb = GradientBoostingClassifier()
+gb_cv = GridSearchCV(gb, grid, cv = 4)
+gb_cv.fit(X_train,y_train)
+print("Best Parameters:",gb_cv.best_params_)
+print("Train Score:",gb_cv.best_score_)
+print("Test Score:",gb_cv.score(X_test,y_test))
+
+
+
+result_dict_train
+result_dict_test
+
+    
